@@ -28,3 +28,19 @@ class MLP:
         for layer in self.layers:
             xs = layer(xs)
         return xs
+
+nn = MLP(3, [4,4,1])
+xs = [
+    [2.0, 3.0, -1.0],
+    [3.0, -1.0, 0.5],
+    [0.5, 1.0, 1.0],
+    [1.0, 1.0, -1.0],
+]
+ys = [1.0, -1.0, -1.0, 1.0]
+
+ypred = [nn(x) for x in xs]
+loss = sum((ygt - yout)**2 for ygt, yout in zip(ys, ypred))
+
+print("target:", ys)
+print("output:", ypred)
+print("loss:  ", loss)
