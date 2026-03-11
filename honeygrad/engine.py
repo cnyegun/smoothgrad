@@ -9,7 +9,7 @@ class Value:
         self._op = _op
 
     def __repr__(self):
-        return f"Value({self.data:.1f})"
+        return f"{self.data:.1f}"
     
     def __add__(self, other):
         other = other if isinstance(other, Value) else Value(other)
