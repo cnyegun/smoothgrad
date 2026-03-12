@@ -52,6 +52,16 @@ class Value:
 
         return out
 
+    def log(self, eps=1e-8):
+        safe_data = self.data if self.data > eps else eps
+        out = Value(math.log(safe_data), (self,), 'log')
+        
+        def _backward():
+            self.grad += out.grad / safe_data
+        out._backward = _backward
+
+        return out    
+
     def __radd__(self, other):
         return self + other
 
