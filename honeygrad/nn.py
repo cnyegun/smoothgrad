@@ -12,6 +12,8 @@ class Neuron:
             act += w * x
         out = act.tanh()
         return out
+    def parameters(self):
+        return self.weights + [self.bias]
 
 class Layer:
     def __init__(self, nin, nout):
@@ -19,6 +21,11 @@ class Layer:
     def __call__(self, xs):
         outs = [n(xs) for n in self.neurons]
         return outs[0] if len(outs) == 1 else outs
+    def parameters(self):
+        params = []
+        for n in self.neurons:
+            params.extend(n.parameters())
+        return params
 
 class MLP:
     def __init__(self, nin, nouts):
@@ -28,8 +35,17 @@ class MLP:
         for layer in self.layers:
             xs = layer(xs)
         return xs
+    def parameters(self):
+        params = []
+        for l in self.layers:
+            params.extend(l.parameters())
+        return params
 
+
+random.seed(1337)
 nn = MLP(3, [4,4,1])
+params = nn.parameters()
+
 xs = [
     [2.0, 3.0, -1.0],
     [3.0, -1.0, 0.5],
@@ -38,9 +54,22 @@ xs = [
 ]
 ys = [1.0, -1.0, -1.0, 1.0]
 
-ypred = [nn(x) for x in xs]
-loss = sum((ygt - yout)**2 for ygt, yout in zip(ys, ypred))
+step_size = 0.05
+training_set = 100 
+for _ in range(training_set):
+    ypred = [nn(x) for x in xs]
+    loss = sum((ygt - yout)**2 for ygt, yout in zip(ys, ypred))
 
-print("target:", ys)
-print("output:", ypred)
-print("loss:  ", loss)
+    # always zero out all the grad before do backward pass
+    for p in params:
+        p.grad = 0.0
+    loss.backward()
+
+    print("target:", ys)
+    print("output:", ypred)
+    print(f"loss:   {loss.data:.5f}", )
+
+    for p in params:
+        p.data += -step_size * p.grad
+
+print("final params:", nn.parameters())
